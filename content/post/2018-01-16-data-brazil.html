@@ -1,0 +1,600 @@
+---
+title: Brazil data
+author: Ricardo Mayer
+date: '2018-01-16'
+categories:
+  - data
+tags:
+  - data
+  - Brazil
+slug: brazil-data
+---
+
+
+
+<div id="data-sources-and-definition" class="section level2">
+<h2>Data sources and definition</h2>
+</div>
+<div id="data-storage" class="section level2">
+<h2>Data storage</h2>
+</div>
+<div id="data-exploration" class="section level2">
+<h2>Data exploration</h2>
+<div id="data-loading" class="section level3">
+<h3>Data loading</h3>
+<p>load</p>
+<pre class="r"><code>country_q &lt;- read_excel(&quot;../../Brasil.xlsx&quot;, sheet = &quot;quarterly&quot;)
+country_m &lt;- read_excel(&quot;../../Brasil.xlsx&quot;, sheet = &quot;monthly&quot;)</code></pre>
+<p>clean up</p>
+<p>Three versions of the data set for different purposes: - multicolumn ts (mts) object - multicolumn xts object - a tibble with list column, to apply functions for each series and store results as another list column (think estimation model, results, etc)</p>
+<p>Some plots</p>
+<p>Quaterly variables</p>
+<pre class="r"><code>plotbase_q &lt;- ggplot(data = data_q_long,
+                     aes(x = date, y = value, colour = variable))  
+
+plot_q &lt;- plotbase_q + geom_line() + 
+  facet_wrap(~variable, scales = &quot;free_y&quot;, ncol = 3) + 
+  theme(legend.position=&quot;none&quot;)
+
+plot_q</code></pre>
+<p><img src="/post/2018-01-16-data-brazil_files/figure-html/plotq-1.png" width="672" /></p>
+<p>Monthly variables</p>
+<pre class="r"><code>plotbase_m &lt;- ggplot(data = data_m_long,
+                     aes(x = date, y = value, colour = variable))  
+
+plot_m &lt;- plotbase_m + geom_line() + 
+  facet_wrap(~variable, scales = &quot;free_y&quot;, ncol = 3) +
+  theme(legend.position=&quot;none&quot;) 
+
+plot_m</code></pre>
+<p><img src="/post/2018-01-16-data-brazil_files/figure-html/plotm-1.png" width="672" /></p>
+</div>
+</div>
+<div id="summary-of-properties" class="section level2">
+<h2>Summary of properties</h2>
+<div id="dates-ranges" class="section level3">
+<h3>Dates ranges</h3>
+<p>Ranges for monthly variables</p>
+<p>Ranges for montlhy and quarterly variables</p>
+<ul>
+<li>Latest real GDP date: 2017-06-01</li>
+<li>Latest monthly date: 2017-08-01<br />
+</li>
+<li>Latest quarterly date: 2017-06-01<br />
+</li>
+<li>Earliest monthly date: 1993-01-01<br />
+</li>
+<li>Earliest quarterly date: 1996-03-01</li>
+</ul>
+Monthly variables <em>strictly</em> more up-to-date than GDP:
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+variable
+</th>
+<th style="text-align:left;">
+min_date
+</th>
+<th style="text-align:left;">
+max_date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+conf_ibre
+</td>
+<td style="text-align:left;">
+2008-06-01
+</td>
+<td style="text-align:left;">
+2017-08-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+conf_emp
+</td>
+<td style="text-align:left;">
+2009-12-01
+</td>
+<td style="text-align:left;">
+2017-08-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+cred
+</td>
+<td style="text-align:left;">
+1994-07-01
+</td>
+<td style="text-align:left;">
+2017-07-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tax
+</td>
+<td style="text-align:left;">
+1994-07-01
+</td>
+<td style="text-align:left;">
+2017-07-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+conf_cons
+</td>
+<td style="text-align:left;">
+1999-03-01
+</td>
+<td style="text-align:left;">
+2017-07-01
+</td>
+</tr>
+</tbody>
+</table>
+All monthly variables:
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+variable
+</th>
+<th style="text-align:left;">
+min_date
+</th>
+<th style="text-align:left;">
+max_date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+conf_ibre
+</td>
+<td style="text-align:left;">
+2008-06-01
+</td>
+<td style="text-align:left;">
+2017-08-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+conf_emp
+</td>
+<td style="text-align:left;">
+2009-12-01
+</td>
+<td style="text-align:left;">
+2017-08-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+cred
+</td>
+<td style="text-align:left;">
+1994-07-01
+</td>
+<td style="text-align:left;">
+2017-07-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tax
+</td>
+<td style="text-align:left;">
+1994-07-01
+</td>
+<td style="text-align:left;">
+2017-07-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+conf_cons
+</td>
+<td style="text-align:left;">
+1999-03-01
+</td>
+<td style="text-align:left;">
+2017-07-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+exp
+</td>
+<td style="text-align:left;">
+1993-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+exp_primary
+</td>
+<td style="text-align:left;">
+1993-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+imp
+</td>
+<td style="text-align:left;">
+1993-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tcr
+</td>
+<td style="text-align:left;">
+1993-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tot
+</td>
+<td style="text-align:left;">
+1993-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+imp_capital
+</td>
+<td style="text-align:left;">
+1997-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+imp_consumer
+</td>
+<td style="text-align:left;">
+1997-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+imp_intermediate
+</td>
+<td style="text-align:left;">
+1997-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+retail
+</td>
+<td style="text-align:left;">
+2000-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ip
+</td>
+<td style="text-align:left;">
+2002-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ip_capital_goods
+</td>
+<td style="text-align:left;">
+2002-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ip_consumer_goods
+</td>
+<td style="text-align:left;">
+2002-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ip_dura
+</td>
+<td style="text-align:left;">
+2002-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ip_intermediate_goods
+</td>
+<td style="text-align:left;">
+2002-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ip_manufacturing
+</td>
+<td style="text-align:left;">
+2002-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ip_mining
+</td>
+<td style="text-align:left;">
+2002-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ip_nodura
+</td>
+<td style="text-align:left;">
+2002-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ibc
+</td>
+<td style="text-align:left;">
+2003-01-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+vta_bs_k
+</td>
+<td style="text-align:left;">
+1999-01-01
+</td>
+<td style="text-align:left;">
+2017-05-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bolsa
+</td>
+<td style="text-align:left;">
+1993-01-01
+</td>
+<td style="text-align:left;">
+2016-10-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+flujos_k
+</td>
+<td style="text-align:left;">
+1995-01-01
+</td>
+<td style="text-align:left;">
+2016-09-01
+</td>
+</tr>
+</tbody>
+</table>
+All quarterly variables
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+variable
+</th>
+<th style="text-align:left;">
+min_date
+</th>
+<th style="text-align:left;">
+max_date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+exist
+</td>
+<td style="text-align:left;">
+1996-03-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fbcf
+</td>
+<td style="text-align:left;">
+1996-03-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+manuf
+</td>
+<td style="text-align:left;">
+1996-03-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+primario
+</td>
+<td style="text-align:left;">
+1996-03-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rgc
+</td>
+<td style="text-align:left;">
+1996-03-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rgdp
+</td>
+<td style="text-align:left;">
+1996-03-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rgdp_sa
+</td>
+<td style="text-align:left;">
+1996-03-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ri
+</td>
+<td style="text-align:left;">
+1996-03-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rm
+</td>
+<td style="text-align:left;">
+1996-03-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rpc
+</td>
+<td style="text-align:left;">
+1996-03-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rx
+</td>
+<td style="text-align:left;">
+1996-03-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+serv
+</td>
+<td style="text-align:left;">
+1996-03-01
+</td>
+<td style="text-align:left;">
+2017-06-01
+</td>
+</tr>
+</tbody>
+</table>
+<p>plots with dates</p>
+<p><img src="/post/2018-01-16-data-brazil_files/figure-html/plot_dates_m-1.png" width="672" /></p>
+<p><img src="/post/2018-01-16-data-brazil_files/figure-html/plot_dates_q-1.png" width="672" /></p>
+</div>
+</div>

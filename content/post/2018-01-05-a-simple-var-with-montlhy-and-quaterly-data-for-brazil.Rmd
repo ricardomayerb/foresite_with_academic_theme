@@ -1,0 +1,49 @@
+---
+title: A simple VAR with montlhy and quaterly data for Brazil
+author: Ricardo Mayer
+date: '2018-01-05'
+slug: a-simple-var-with-montlhy-and-quaterly-data-for-brazil
+categories:
+  - R
+tags:
+  - VAR
+  - mixed-frequency
+---
+
+## Overview
+
+We will estimar a VAR model with following characteristics
+
+-  Data will be transformed to Year-on-Year (YoY) percent changes or into YoY log diferences
+
+-  Monthly data will be converted to quarterly data. All our variables are flow variables, so we take the average value of the three monthly values to represent the quarterly value.
+ 
+-  We will construct a balanced data set, so we will simply chop off any monthly data more recent than our quarterly variables.
+
+## Data description
+
+Please refer to Brazilian data documentation section for details of what is included. Here we just list the name of available variabeles
+
+### List of quaterly variables
+
+
+### List of monthly variables
+
+### Monthly into Quarterly
+
+## Time series properties of variables
+
+### Plots
+
+
+### Differencing and seasonality
+
+## Stationarity
+
+### Unit root tests
+
+## VAR estimation
+
+
+
+

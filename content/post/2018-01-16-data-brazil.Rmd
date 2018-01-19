@@ -1,0 +1,233 @@
+---
+title: Brazil data
+author: Ricardo Mayer
+date: '2018-01-16'
+categories:
+  - data
+tags:
+  - data
+  - Brazil
+slug: brazil-data
+---
+
+```{r setup, message=FALSE, echo=FALSE}
+options(knitr.table.format = "html", knitr.kable.NA = '') 
+library(kableExtra)
+library(tidyr)
+library(dplyr)
+library(timetk)
+library(readxl)
+library(lubridate)
+library(purrr)
+library(forecast)
+library(ggplot2)
+library(tibbletime)
+```
+
+
+## Data sources and definition
+
+## Data storage 
+
+## Data exploration
+
+### Data loading
+
+load
+```{r data_load}
+country_q <- read_excel("../../Brasil.xlsx", sheet = "quarterly")
+country_m <- read_excel("../../Brasil.xlsx", sheet = "monthly")
+```
+
+
+
+clean up
+
+```{r cleanup,  message=FALSE, warning=FALSE, echo=FALSE}
+# data_q <- country_q %>% select(-c(year, quarter, trim, hlookup)) 
+
+data_q <- country_q %>% select(-c(year, quarter, trim, hlookup)) %>%
+  filter(!is.na(rgdp))
+
+data_m <- country_m %>% select(-c(year, month,  hlookup)) 
+
+data_q$date <- ymd(data_q$date)
+data_m$date <- ymd(data_m$date)
+```
+
+Three versions of the data set for different purposes:
+- multicolumn ts (mts) object 
+- multicolumn xts object
+- a tibble with list column, to apply functions for each series and store results as another list column (think estimation model, results, etc)
+
+```{r reshape_and_nesting, message=FALSE, warning=FALSE, echo=FALSE}
+start_year_q <- min(year(data_q$date))
+start_year_m <- min(year(data_m$date))
+
+
+data_q_mts <- tk_ts(data_q, start = start_year_q, frequency = 4)
+data_q_xts <- tk_xts(data_q, date_var = date)
+data_q_tbt <- as_tbl_time(data_q, index = date)
+data_q_long <- data_q %>% gather(variable, value, -date)
+
+data_q_nested <- data_q_long %>% group_by(variable) %>% 
+  nest(.key = "data.tbl")
+data_q_n_ts <- data_q_nested %>% 
+  mutate(data.ts = map(.x   =  data.tbl,
+                       .f   =  tk_ts,
+                       start = start_year_q,
+                       freq = 4
+                       )
+         )
+
+data_m_mts <- tk_ts(data_m, start = start_year_m, frequency = 12)
+data_m_xts <- tk_xts(data_m, date_var = date)
+data_m_tbt <- as_tbl_time(data_m, index = date)
+data_m_long <- data_m %>% gather(variable, value, -date)
+
+data_m_nested <- data_m_long %>% group_by(variable) %>% 
+  nest(.key = "data.tbl")
+data_m_n_ts <- data_m_nested %>% 
+  mutate(data.ts = map(.x   =  data.tbl,
+                       .f   =  tk_ts,
+                       start = start_year_m,
+                       freq = 12
+                       )
+         )
+
+```
+
+Some plots
+
+Quaterly variables
+```{r plotq, message=FALSE, warning=FALSE}
+plotbase_q <- ggplot(data = data_q_long,
+                     aes(x = date, y = value, colour = variable))  
+
+plot_q <- plotbase_q + geom_line() + 
+  facet_wrap(~variable, scales = "free_y", ncol = 3) + 
+  theme(legend.position="none")
+
+plot_q
+```
+
+
+Monthly variables
+```{r plotm, message=FALSE, warning=FALSE}
+plotbase_m <- ggplot(data = data_m_long,
+                     aes(x = date, y = value, colour = variable))  
+
+plot_m <- plotbase_m + geom_line() + 
+  facet_wrap(~variable, scales = "free_y", ncol = 3) +
+  theme(legend.position="none") 
+
+plot_m
+```
+
+
+## Summary of properties
+
+### Dates ranges
+
+
+Ranges for monthly variables
+
+```{r date_ranges_m, echo=FALSE}
+
+data_m_long <- data_m_long %>% 
+  mutate(date_not_nas = date) 
+
+data_m_long[ is.na(data_m_long$value)   ,"date_not_nas"] <- NA
+
+minmaxdates_m <- data_m_long %>% group_by(variable) %>% 
+  filter(!is.na(date_not_nas)) %>% 
+  summarise(min_date = min(date_not_nas),
+            max_date = max(date_not_nas)
+            ) %>% 
+  arrange(desc(max_date), min_date)
+
+monthly_absolute_min <- min(minmaxdates_m$min_date)
+monthly_absolute_max <- max(minmaxdates_m$max_date)
+```
+
+
+```{r date_ranges_q, echo=FALSE}
+
+data_q_long <- data_q_long %>% 
+  mutate(date_not_nas = date) 
+
+data_q_long[ is.na(data_q_long$value)   ,"date_not_nas"] <- NA
+
+minmaxdates_q <- data_q_long %>% group_by(variable) %>% 
+  filter(!is.na(date_not_nas)) %>% 
+  summarise(min_date = min(date_not_nas),
+            max_date = max(date_not_nas)
+            ) %>% 
+  arrange(desc(max_date), min_date)
+
+quarterly_absolute_min <- min(minmaxdates_q$min_date)
+quarterly_absolute_max <- max(minmaxdates_q$max_date)
+
+
+latest_rgdp <- minmaxdates_q %>% filter(variable == "rgdp")
+latest_rgdp <- latest_rgdp[["max_date"]]
+
+```
+
+
+
+Ranges for montlhy and quarterly variables
+
+- Latest real GDP date:  `r latest_rgdp` 
+- Latest monthly date: `r monthly_absolute_max`  
+- Latest quarterly date: `r quarterly_absolute_max`  
+- Earliest monthly date: `r monthly_absolute_min`  
+- Earliest quarterly date: `r quarterly_absolute_min`  
+
+Monthly variables *strictly* more up-to-date than GDP:
+```{r monthly_leads, echo=FALSE}
+knitr::kable(dplyr::filter(minmaxdates_m, max_date > latest_rgdp),
+             format = "html") %>% 
+  kable_styling(bootstrap_options = "striped")
+```
+
+
+ 
+All monthly variables:
+```{r table_dates_m, echo=FALSE}
+knitr::kable(minmaxdates_m, format = "html") %>% 
+  kable_styling(bootstrap_options = "striped")
+
+```
+
+
+All quarterly variables
+```{r table_dates_q, echo=FALSE}
+knitr::kable(minmaxdates_q, format = "html") %>% 
+  kable_styling(bootstrap_options = "striped")
+
+```
+
+plots with dates
+
+```{r plot_dates_m, echo=FALSE}
+
+p_date_base <- ggplot(data = data_m_long, 
+                      aes(date_not_nas, variable)) 
+
+p_date_m <- p_date_base + geom_line(aes(group = variable), na.rm = TRUE, col = "blue")
+p_date_m
+
+```
+
+
+
+```{r plot_dates_q, echo=FALSE}
+
+p_date_base_q <- ggplot(data = data_q_long, 
+                      aes(date_not_nas, variable)) 
+
+p_date_q <- p_date_base_q + geom_line(aes(x = date_not_nas, group = variable), na.rm = TRUE)
+p_date_q
+
+```
